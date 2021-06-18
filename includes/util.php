@@ -7,9 +7,13 @@ function get_table_head($assoc_array)
 
     foreach ($keys as $key) {
         $html .= '<th>' . ucwords($key) . '</th>';
+
     }
 
-    return $html;
+
+    
+
+    return $html . "<th> </th>";
 }
 
 function get_table_body($items)
@@ -33,8 +37,8 @@ function get_table_body($items)
             }
         }
         if (!isset($_GET['id'])) {
-            $html .= '<td><a href="/rubrica/includes/cancella-contatto.php?id=' . $row['Id'] . '" class="text-decoration-none">❌</a></td>';
-            $html .= '<td><a href="/rubrica/modifica-contatto.php?id=' . $row['Id'] . '" class="text-decoration-none">✏</a></td>';
+            $html .= '<td><a href="/rubrica/includes/cancella-contatto.php?id=' . $row['Id'] . '" class="text-decoration-none">❌</a> <a href="/rubrica/modifica-contatto.php?id=' . $row['Id'] . '" class="text-decoration-none">✏</a></td>';
+            // $html .= '<td><a href="/rubrica/modifica-contatto.php?id=' . $row['Id'] . '" class="text-decoration-none">✏</a></td>';
         }
         $html .= '</tr>';
     }

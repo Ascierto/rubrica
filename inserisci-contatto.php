@@ -9,11 +9,11 @@
          <?php
           if (isset($_GET['stato']) && $_GET['stato'] === 'ok'):
           ?>
-                <div class="stato stato--ok">Contatto aggiunto con successo.</div>
+                <div class="alert alert-success" role="alert">Contatto aggiunto con successo.</div>
               <?php
           elseif (isset($_GET['stato']) && $_GET['stato'] === 'ko'):
           ?>
-                <div class="stato stato--ko">Ops! C'è stato un problema, riprova più tardi.</div>
+                <div class="alert alert-danger" role="alert">Ops! C'è stato un problema, riprova più tardi.</div>
               <?php
           endif;
           ?>

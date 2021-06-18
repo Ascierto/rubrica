@@ -11,7 +11,7 @@
 <body>
 
  
-<header class="navbar navbar-expand-lg navbar-light bg-light">
+  <header class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
           <a class="navbar-brand text-success fw-bold" href="#">Rubrica</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,4 +28,4 @@
             </ul> 
           </div>
         </div>
-      </header>
+  </header>
