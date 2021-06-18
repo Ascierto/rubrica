@@ -42,3 +42,41 @@ function get_table_body($items)
     return $html;
 
 }
+
+function show_alert($action_type,$state)
+{
+    
+
+        if($state === 'ko'){
+
+            echo '<div class="alert alert-warning" role="alert">Ops qualcosa è andato storto.</div>';
+        }
+
+    if($action_type === 'cancellazione' ){
+
+        if($state === 'ok'){
+
+            echo '<div class="alert alert-success" role="alert">Contatto eliminato con successo.</div>';
+        }
+
+        
+    } else if($action_type === 'modifica' ){
+
+        if($state === 'ok'){
+
+            echo '<div class="alert alert-success" role="alert">Contatto modificato con successo.</div>';
+        }
+    }else if($action_type === 'inserimento' ){
+
+        if($state === 'ok'){
+
+            echo '<div class="alert alert-success" role="alert">Contatto inserito con successo.</div>';
+        }
+    }
+
+
+
+
+   
+
+}
