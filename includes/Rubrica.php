@@ -1,62 +1,60 @@
 <?php
-include __DIR__ . '/FormHandle.php';
-class Rubrica extends FormHandle
+
+namespace DataRubrica;
+
+use mysqli;
+
+use Exception;
+
+class Rubrica extends \DataFather\FormHandle
 {
     protected static function sanitize($fields)
     {
-        $fields['nome'] = self::clean_input($fields['nome']);
+        $errors = array();
+        $fields['nome'] = \DataFather\FormHandle::cleanInput($fields['nome']);
         // Sanificare numero di telefono e verificarne la validità
-        $fields['telefono'] = self::clean_input($fields['telefono']);
-        if (self::is_phone_number_valid($fields['telefono']) === 0) {
-            var_dump("Numero di telefono non valido.");
-            return false;
-            // TODO: gestire errore.
-        } else if (self::is_phone_number_valid($fields['telefono']) === false) {
-            var_dump("C'è un errore nella regex 😓");
-            // TODO: gestire errore.
-            return false;
-
+        $fields['telefono'] = \DataFather\FormHandle::cleanInput($fields['telefono']);
+        if (\DataFather\FormHandle::isPhoneNumberValid($fields['telefono']) === 0) {
+            $errors[] = new Exception("Numero di telefono non valido.");
         }
 
         // Sanificare organizzazione
         if (isset($fields['organizzazione']) && $fields['organizzazione'] !== '') {
-            $fields['organizzazione'] = self::clean_input($fields['organizzazione']);
+            $fields['organizzazione'] = \DataFather\FormHandle::cleanInput($fields['organizzazione']);
         }
 
         // Sanificare email e verificarne la validità
         if (isset($fields['email']) && $fields['email'] !== '') {
-            $fields['email'] = self::clean_input($fields['email']);
-            if (!self::is_email_address_valid($fields['email'])) {
-                var_dump("Indirizzo email non valido.");
-                // TODO: gestire errore.
-                return false;
-
+            $fields['email'] = \DataFather\FormHandle::cleanInput($fields['email']);
+            if (!\DataFather\FormHandle::isEmailAddressValid($fields['email'])) {
+                $errors[] = new Exception("Indirizzo email non valido.");
             }
         }
 
         // Sanificare indirizzo
         if (isset($fields['indirizzo']) && $fields['indirizzo'] !== '') {
-            $fields['indirizzo'] = self::clean_input($fields['indirizzo']);
+            $fields['indirizzo'] = \DataFather\FormHandle::cleanInput($fields['indirizzo']);
         }
 
         // Sanificare compleanno e verificare che sia una data.
         if (isset($fields['compleanno']) && $fields['compleanno'] !== '') {
-            $fields['compleanno'] = self::clean_input($fields['compleanno']);
+            $fields['compleanno'] = \DataFather\FormHandle::cleanInput($fields['compleanno']);
             if (strtotime($fields['compleanno'])) {
                 // Converte la data nel formato previsto da MySQL.
                 $fields['compleanno'] = date('Y-m-d', strtotime(str_replace('-', '/', $fields['compleanno'])));
             } else {
-                var_dump("Data di compleanno non valida.");
-                // TODO: gestire errore.
-                return false;
-
+                $errors[] = new Exception("Data di compleanno non valida.");
             }
+        }
+
+        if (count($errors) > 0) {
+            return $errors;
         }
 
         return $fields;
     }
 
-    public static function insert_data($form_data)
+    public static function insertData($form_data)
     {
 
         $fields = array(
@@ -69,6 +67,22 @@ class Rubrica extends FormHandle
         );
 
         $fields = self::sanitize($fields);
+
+        if ($fields[0] instanceof Exception) {
+            $error_messages = "";
+            foreach ($fields as $key => $error) {
+                $error_messages .= $error->getMessage();
+                if ($key < count($fields) - 1) {
+                    $error_messages .= '|';
+                }
+            }
+            header(
+                'Location: http://localhost:8888/rubrica/inserisci-contatto.php?stato=errore&messages='
+                . $error_messages
+            );
+
+            exit;
+        }
 
         if ($fields) {
             $mysqli = new mysqli("127.0.0.1", "root", "rootroot", "rubricadb");
@@ -83,14 +97,19 @@ class Rubrica extends FormHandle
             $query->execute();
 
             if ($query->affected_rows === 0) {
-                var_dump("Errore in inserimento, controlla il log.");
-                // TODO: gestire errore.
-                return false;
+                error_log("Errore MySQL: " . $query->error_list[0]['error']);
+                header('Location: http://localhost:8888/rubrica/inserisci-contatto.php?stato=ko');
+                exit;
             }
 
             $last_id = $query->insert_id;
 
-            $query_2 = $mysqli->prepare("INSERT INTO contatti_meta(contatti_id, organizzazione, email, indirizzo, compleanno) VALUES (?, ?, ?, ?, ?)");
+            $query_2 = $mysqli->prepare(
+                "INSERT INTO 
+            contatti_meta(contatti_id, organizzazione, email, indirizzo, compleanno)
+             VALUES (?, ?, ?, ?, ?)"
+            );
+
             $org = ($fields['organizzazione'] !== '') ? $fields['organizzazione'] : null;
             $email = ($fields['email'] !== '') ? $fields['email'] : null;
             $indirizzo = ($fields['indirizzo'] !== '') ? $fields['indirizzo'] : null;
@@ -105,12 +124,10 @@ class Rubrica extends FormHandle
 
             header('Location: http://localhost:8888/rubrica/inserisci-contatto.php?stato=ok');
             exit;
-
         }
-
     }
 
-    public static function select_data($args = null)
+    public static function selectData($args = null)
     {
         $mysqli = new mysqli("127.0.0.1", "root", "rootroot", "rubricadb");
 
@@ -121,7 +138,11 @@ class Rubrica extends FormHandle
 
         if (isset($args['id'])) {
             $args['id'] = intval($args['id']);
-            $query = $mysqli->prepare("SELECT contatti.ID, Nome, Telefono, organizzazione, email, indirizzo, compleanno FROM contatti JOIN contatti_meta ON contatti.ID=contatti_meta.contatti_id WHERE contatti.ID = ?");
+            $query = $mysqli->prepare(
+                "SELECT contatti.ID, Nome, Telefono, organizzazione, email, indirizzo, compleanno
+             FROM contatti JOIN contatti_meta ON contatti.ID=contatti_meta.contatti_id WHERE contatti.ID = ?"
+            );
+
             $query->bind_param('i', $args['id']);
             $query->execute();
             $query = $query->get_result();
@@ -136,10 +157,9 @@ class Rubrica extends FormHandle
         }
 
         return $results;
-
     }
 
-    public static function delete_data($id)
+    public static function deleteData($id)
     {
         $mysqli = new mysqli("127.0.0.1", "root", "rootroot", "rubricadb");
 
@@ -165,10 +185,9 @@ class Rubrica extends FormHandle
             header('Location: http://localhost:8888/rubrica/?statocanc=ko');
             exit;
         }
-
     }
 
-    public static function update_data($form_data, $id)
+    public static function updateData($form_data, $id)
     {
 
         $fields = array(
@@ -191,31 +210,63 @@ class Rubrica extends FormHandle
             }
 
             $id = intval($id);
+            $is_in_error = false;
 
-            $query = $mysqli->prepare("UPDATE contatti SET Nome = ?, Telefono = ? WHERE ID = ?");
-            $query->bind_param('ssi', $fields['nome'], $fields['telefono'], $id);
-            $query->execute();
-
-            if (count($query->error_list) > 0) {
-                var_dump("Errore in inserimento, controlla il log.");
-                // TODO: gestire errore.
-                return false;
+            try {
+                $query = $mysqli->prepare("UPDATE contatti SET Nome = ?, Telefono = ? WHERE ID = ?");
+                if (is_bool($query)) {
+                    $is_in_error = true;
+                    throw new Exception('Query non valida. $mysqli->prepare ha restituito false.');
+                }
+                $query->bind_param('ssi', $fields['nome'], $fields['telefono'], $id);
+                $query->execute();
+            } catch (Exception $e) {
+                error_log("Errore PHP in linea {$e->getLine()}: " . $e->getMessage() . "\n", 3, "my-errors.log");
             }
 
-            $query_2 = $mysqli->prepare("UPDATE contatti_meta SET organizzazione = ?, email = ?, indirizzo = ?, compleanno = ? WHERE contatti_id = ?");
-            $org = ($fields['organizzazione'] !== '') ? $fields['organizzazione'] : null;
-            $email = ($fields['email'] !== '') ? $fields['email'] : null;
-            $indirizzo = ($fields['indirizzo'] !== '') ? $fields['indirizzo'] : null;
-            $compleanno = ($fields['compleanno'] !== '') ? $fields['compleanno'] : null;
-            $query_2->bind_param('ssssi', $org, $email, $indirizzo, $compleanno, $id);
-            $query_2->execute();
+            if (!is_bool($query)) {
+                if (count($query->error_list) > 0) {
+                    $is_in_error = true;
+                    foreach ($query->error_list as $error) {
+                        error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, "my-errors.log");
+                    }
+                    header('Location: http://localhost:8888/rubrica/modifica-contatto.php?id=' . $id . '&stato=ko');
+                    exit;
+                }
+                try {
+                    $query_2 = $mysqli->prepare(
+                        "UPDATE contatti_meta 
+                    SET organizzazione = ?, email = ?, indirizzo = ?, compleanno = ? 
+                    WHERE contatti_id = ?"
+                    );
+                    
+                    if (is_bool($query_2)) {
+                        $is_in_error = true;
+                        throw new Exception("Query non valida. $mysqli->prepare ha restituito false.");
+                    }
+                    $org = ($fields['organizzazione'] !== '') ? $fields['organizzazione'] : null;
+                    $email = ($fields['email'] !== '') ? $fields['email'] : null;
+                    $indirizzo = ($fields['indirizzo'] !== '') ? $fields['indirizzo'] : null;
+                    $compleanno = ($fields['compleanno'] !== '') ? $fields['compleanno'] : null;
+                    $query_2->bind_param('ssssi', $org, $email, $indirizzo, $compleanno, $id);
+                    $query_2->execute();
+                } catch (Exception $e) {
+                    error_log("Errore PHP: " . $e->getMessage() . "\n", 3, "my-errors.log");
+                }
 
-            if (count($query_2->error_list) > 0) {
-                header('Location: http://localhost:8888/rubrica/modifica-contatto.php?stato=ko&id=' . $id);
-                exit;
+                if (count($query_2->error_list) > 0) {
+                    $is_in_error = true;
+                    foreach ($query_2->error_list as $error) {
+                        error_log("Errore MySQL n. {$error['errno']}: {$error['error']} \n", 3, "my-errors.log");
+                    }
+
+                    header('Location: http://localhost:8888/rubrica/modifica-contatto.php?stato=ko&id=' . $id);
+                    exit;
+                }
             }
 
-            header('Location: http://localhost:8888/rubrica/modifica-contatto.php?id=' . $id . '&stato=ok');
+            $stato = $is_in_error ? "ko" : "ok";
+            header('Location: http://localhost:8888/rubrica/modifica-contatto.php?id=' . $id . '&stato=' . $stato);
             exit;
         }
     }

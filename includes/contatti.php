@@ -1,7 +1,13 @@
 <?php
-include './Rubrica.php';
+    require __DIR__ . '/FormHandle.php';
+    require './Rubrica.php';
+
 if (isset($_GET['id'])) {
-    Rubrica::update_data($_POST, $_GET['id']);
+    DataRubrica\Rubrica::updateData($_POST, $_GET['id']);
 } else {
-    Rubrica::insert_data($_POST);
+    try {
+        DataRubrica\Rubrica::insertData($_POST);
+    } catch (Exception $e) {
+        echo "Exception: ", $e->getMessage(), "\n";
+    }
 }

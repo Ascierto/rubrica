@@ -1,22 +1,17 @@
 
- 
-        <?php include __DIR__ . "/includes/header.php"  ?>
+ <?php
+ require __DIR__ . '/includes/header.php';
+ require __DIR__ . '/includes/util.php';
+ if (isset($_GET['stato'])) {
+     show_alert("inserimento", $_GET['stato']);
+ }
+    ?>
     
   <main class="container my-5">
     <div class="row justify-content-center">
       <div class="col-12 col-md-8 card">
 
-         <?php
-          if (isset($_GET['stato']) && $_GET['stato'] === 'ok'):
-          ?>
-                <div class="alert alert-success" role="alert">Contatto aggiunto con successo.</div>
-              <?php
-          elseif (isset($_GET['stato']) && $_GET['stato'] === 'ko'):
-          ?>
-                <div class="alert alert-danger" role="alert">Ops! C'è stato un problema, riprova più tardi.</div>
-              <?php
-          endif;
-          ?>
+         
 
             <form action="includes/contatti.php" method="POST">
 
