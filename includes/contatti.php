@@ -1,13 +1,11 @@
 <?php
-    require __DIR__ . '/FormHandle.php';
-    require './Rubrica.php';
-
+include_once __DIR__ . '/globals.php';
 if (isset($_GET['id'])) {
-    DataRubrica\Rubrica::updateData($_POST, $_GET['id']);
+    \DataHandling\Rubrica::updateData($_POST, $_GET['id']);
 } else {
     try {
-        DataRubrica\Rubrica::insertData($_POST);
+        \DataHandling\Rubrica::insertData($_POST, $_SESSION["userId"]);
     } catch (Exception $e) {
-        echo "Exception: ", $e->getMessage(), "\n";
+        echo 'Exception: ', $e->getMessage(), "\n";
     }
 }
