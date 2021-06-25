@@ -3,8 +3,6 @@ include __DIR__ . '/includes/globals.php';
 
 $contatti = \DataHandling\Rubrica::selectData(array( 'userId' => $_SESSION['userId'] ));
 
-
-
 if (isset($_GET['statocanc'])) {
     \DataHandling\Utils\show_alert('cancellazione', $_GET['statocanc']);
 }

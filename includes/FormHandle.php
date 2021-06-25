@@ -9,7 +9,7 @@ abstract class FormHandle
     abstract protected static function sanitize($fields);
     abstract public static function insertData($form_data, $loggedInUserId);
     abstract public static function selectData($args = null);
-    abstract public static function deleteData($id);
+    abstract public static function deleteData($id = null, $userId = null);
     abstract public static function updateData($form_data, $id);
     public static function isPhoneNumberValid($phone_number)
     {

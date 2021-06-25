@@ -36,6 +36,9 @@ session_start();
               <li>
                 <a class="nav-link" href="/rubrica/includes/login.php?logout=1">Logout</a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/rubrica/admin.php">Area Admin</a>
+              </li
             <?php else: ?>
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="/rubrica/login.php">Accedi</a>

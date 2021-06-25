@@ -1,13 +1,11 @@
 <?php
 namespace DataHandling;
 
-use InputSanitize;
-
+use \DataHandling\Utils\InputSanitize;
 use Mysqli;
 
 class Rubrica extends FormHandle
 {
-    
 
     protected static function sanitize($fields)
     {
@@ -90,8 +88,6 @@ class Rubrica extends FormHandle
             }
 
             $query = $mysqli->prepare('INSERT INTO contatti(Nome, Telefono, id_utente) VALUES (?, ?, ?)');
-
-            
             $query->bind_param('ssi', $fields['nome'], $fields['telefono'], $loggedInUserId);
             $query->execute();
 
@@ -102,7 +98,7 @@ class Rubrica extends FormHandle
             }
 
             $last_id = $query->insert_id;
-            
+
             $query->close();
 
             $query_2    = $mysqli->prepare('INSERT INTO
@@ -155,20 +151,18 @@ class Rubrica extends FormHandle
         return $results;
     }
 
-    public static function deleteData($id)
+    public static function deleteData($id = null, $userId = null)
     {
-         $mysqli = new mysqli('127.0.0.1', 'root', 'rootroot', 'rubricadb');
+      $mysqli = new mysqli('127.0.0.1', 'root', 'rootroot', 'rubricadb');
 
-        if ($mysqli->connect_errno) {
-            echo 'Connessione al database fallita: ' . $mysqli->connect_error;
-            exit();
-        }
+      if ($mysqli->connect_errno) {
+          echo 'Connessione al database fallita: ' . $mysqli->connect_error;
+          exit();
+      }
+
+      if ( $id ) {
 
         $id = intval($id);
-
-        $query = $mysqli->prepare('DELETE FROM contatti_meta WHERE contatti_id = ?');
-        $query->bind_param('i', $id);
-        $query->execute();
 
         $query = $mysqli->prepare('DELETE FROM contatti WHERE ID = ?');
         $query->bind_param('i', $id);
@@ -181,6 +175,20 @@ class Rubrica extends FormHandle
             header('Location: http://localhost:8888/rubrica/?statocanc=ko');
             exit;
         }
+      } else {
+        // $query = $mysqli->query('DELETE FROM contatti_meta');
+        $query = $mysqli->prepare('DELETE FROM contatti WHERE id_utente = ?');
+        $query->bind_param('i', $userId);
+        $query->execute();
+
+        if ($query->affected_rows > 0) {
+            header('Location: http://localhost:8888/rubrica/admin.php?statocanc=ok');
+            exit;
+        } else {
+            header('Location: http://localhost:8888/rubrica/admin.php?statocanc=ko');
+            exit;
+        }
+      }
     }
 
     public static function updateData($form_data, $id)
