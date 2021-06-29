@@ -20,7 +20,7 @@ class Utenti
 
         if ($fields['password'] !== $fields['password-check']) {
           //phpcs:disable
-            header('Location: http//localhost:8888/rubrica/registrazione.php?stato=errore&messages=Le password non corrispondono');
+            header('Location: http://localhost:8888/rubrica/registrazione.php?stato=errore&messages=Le password non corrispondono');
             exit;
           //phpcs:enable
         }
@@ -35,7 +35,7 @@ class Utenti
         $query_user = $mysqli->query("SELECT username FROM utenti WHERE username = '" . $fields['username'] . "'");
 
         if ($query_user->num_rows > 0) {
-            header('Location: http//localhost:8888/rubrica/registrazione.php?stato=errore&messages=Username già preso');
+            header('Location: http://localhost:8888/rubrica/registrazione.php?stato=errore&messages=Username già preso');
             exit;
         }
 
@@ -47,7 +47,7 @@ class Utenti
 
         if ($query->affected_rows === 0) {
             error_log('Error MySQL: ' . $query->error_list[0]['error']);
-            header('Location: http//localhost:8888/rubrica/registrazione.php?stato=ko');
+            header('Location: http://localhost:8888/rubrica/registrazione.php?stato=ko');
             exit;
         }
 
@@ -75,14 +75,14 @@ class Utenti
         $query_user = $mysqli->query("SELECT * FROM utenti WHERE username = '" . $fields['username'] . "'");
 
         if ($query_user->num_rows === 0) {
-            header('Location: http//localhost:8888/rubrica/login.php?stato=errore&messages=Utente non presente');
+            header('Location: http://localhost:8888/rubrica/login.php?stato=errore&messages=Utente non presente');
             exit;
         }
 
         $user = $query_user->fetch_assoc();
 
         if ($user['password'] !== md5($fields['password'])) {
-            header('Location: http//localhost:8888/rubrica/login.php?stato=errore&messages=Password errata');
+            header('Location: http://localhost:8888/rubrica/login.php?stato=errore&messages=Password errata');
             exit;
         }
 
@@ -111,7 +111,7 @@ class Utenti
         exit;
       }
 
-      header('Location: http//localhost:8888/rubrica/includes/login.php?logout=1');
+      header('Location: http://localhost:8888/rubrica/includes/login.php?logout=1');
       exit;
 
     }
