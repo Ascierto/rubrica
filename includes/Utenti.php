@@ -51,7 +51,7 @@ class Utenti
             exit;
         }
 
-        header('Location: http//localhost:8888/rubrica/registrazione.php?stato=ok');
+        header('Location: http://localhost:8888/rubrica/registrazione.php?stato=ok');
         exit;
     }
 
@@ -107,7 +107,7 @@ class Utenti
 
       if ($query->affected_rows === 0) {
         error_log('Error MySQL: ' . $query->error_list[0]['error']);
-        header('Location: http//localhost:8888/rubrica/admin.php?stato=ko');
+        header('Location: http://localhost:8888/rubrica/admin.php?stato=ko');
         exit;
       }
 
